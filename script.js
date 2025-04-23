@@ -1,123 +1,99 @@
-// Get DOM elements
+// DOM Elements
 const searchInputEl = document.getElementById("searchInput");
 const searchResultsEl = document.getElementById("searchResults");
 const spinnerEl = document.getElementById("spinner");
+let searchTimeout;
 
-// Function to create and append search results
+// Create and append search result to DOM
 function createAndAppendSearchResult(result) {
-  // Destructure the result object
   const { link, title, description } = result;
 
-  // Create result item container
   const resultItemEl = document.createElement("div");
-  resultItemEl.classList.add("result-item");
+  resultItemEl.className = "result-item";
 
-  // Create and append title element
   const titleEl = document.createElement("a");
+  titleEl.className = "result-title";
   titleEl.href = link;
   titleEl.target = "_blank";
   titleEl.textContent = title;
-  titleEl.classList.add("result-title");
   resultItemEl.appendChild(titleEl);
 
-  // Add line break
-  resultItemEl.appendChild(document.createElement("br"));
-
-  // Create and append URL element
   const urlEl = document.createElement("a");
-  urlEl.classList.add("result-url");
+  urlEl.className = "result-url";
   urlEl.href = link;
   urlEl.target = "_blank";
-  urlEl.textContent = link;
+  urlEl.textContent = new URL(link).hostname;
   resultItemEl.appendChild(urlEl);
 
-  // Add line break
-  resultItemEl.appendChild(document.createElement("br"));
+  const descEl = document.createElement("p");
+  descEl.className = "link-description";
+  descEl.textContent = description || "No description available.";
+  resultItemEl.appendChild(descEl);
 
-  // Create and append description element
-  const descriptionEl = document.createElement("p");
-  descriptionEl.classList.add("link-description");
-  descriptionEl.textContent = description;
-  resultItemEl.appendChild(descriptionEl);
-
-  // Append the complete result item to the results container
   searchResultsEl.appendChild(resultItemEl);
 }
 
-// Function to display all results
-function displayResults(searchResults) {
-  // Hide spinner
-  spinnerEl.classList.add("d-none");
+// Display all search results
+function displayResults(results) {
+  searchResultsEl.innerHTML = "";
+  
+  if (results.length === 0) {
+    const noResults = document.createElement("p");
+    noResults.className = "text-center text-muted";
+    noResults.textContent = "No results found. Try a different search term.";
+    searchResultsEl.appendChild(noResults);
+    return;
+  }
+  
+  results.forEach(createAndAppendSearchResult);
+}
 
-  // Show "no results" message if empty
-  if (searchResults.length === 0) {
-    const noResultsEl = document.createElement("p");
-    noResultsEl.textContent = "No results found. Try a different search term.";
-    noResultsEl.style.textAlign = "center";
-    noResultsEl.style.marginTop = "20px";
-    searchResultsEl.appendChild(noResultsEl);
+// Perform Wikipedia search
+function searchWikipedia(query) {
+  if (!query.trim()) {
+    searchResultsEl.innerHTML = "";
     return;
   }
 
-  // Display each result
-  for (const result of searchResults) {
-    createAndAppendSearchResult(result);
-  }
+  spinnerEl.classList.remove("d-none");
+  searchResultsEl.innerHTML = "";
+
+  fetch(`https://apis.ccbp.in/wiki-search?search=${encodeURIComponent(query)}`)
+    .then(response => {
+      if (!response.ok) throw new Error("Network response was not ok");
+      return response.json();
+    })
+    .then(data => {
+      displayResults(data.search_results || []);
+    })
+    .catch(error => {
+      console.error("Error:", error);
+      const errorEl = document.createElement("p");
+      errorEl.className = "text-center text-danger";
+      errorEl.textContent = "Failed to fetch results. Please try again.";
+      searchResultsEl.appendChild(errorEl);
+    })
+    .finally(() => {
+      spinnerEl.classList.add("d-none");
+    });
 }
 
-// Function to handle search
-function searchWikipedia(event) {
-  if (event.key === "Enter") {
-    // Get search input value
-    const searchInput = searchInputEl.value.trim();
-    
-    // Don't search if input is empty
-    if (!searchInput) {
-      return;
-    }
+// Event Listeners
+searchInputEl.addEventListener("input", (e) => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    searchWikipedia(e.target.value);
+  }, 500);
+});
 
-    // Show loading spinner and clear previous results
-    spinnerEl.classList.remove("d-none");
-    searchResultsEl.textContent = "";
-
-    // API URL with search query
-    const url = `https://apis.ccbp.in/wiki-search?search=${encodeURIComponent(searchInput)}`;
-    
-    // Fetch options
-    const options = {
-      method: "GET"
-    };
-
-    // Fetch data from API
-    fetch(url, options)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then(jsonData => {
-        const { search_results } = jsonData;
-        displayResults(search_results);
-      })
-      .catch(error => {
-        console.error("Error fetching data:", error);
-        spinnerEl.classList.add("d-none");
-        
-        // Show error message
-        const errorEl = document.createElement("p");
-        errorEl.textContent = "An error occurred while fetching results. Please try again.";
-        errorEl.style.textAlign = "center";
-        errorEl.style.color = "#dc3545";
-        searchResultsEl.appendChild(errorEl);
-      });
+searchInputEl.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    clearTimeout(searchTimeout);
+    searchWikipedia(e.target.value);
   }
-}
+});
 
-// Add event listener for search input
-searchInputEl.addEventListener("keydown", searchWikipedia);
-
-// Focus the search input on page load
+// Focus search input on page load
 window.addEventListener("load", () => {
   searchInputEl.focus();
 });
