@@ -1,0 +1,110 @@
+/* Import Google Font */
+@import url("https://fonts.googleapis.com/css2?family=Roboto&display=swap");
+
+/* Main container styling */
+.main-container {
+  font-family: "Roboto", sans-serif;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Search header section */
+.wiki-search-header {
+  border: 1px solid #d5cdcd;
+  padding: 30px 20px;
+  margin-bottom: 40px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Wikipedia logo */
+.wiki-logo {
+  margin-bottom: 30px;
+  width: 150px;
+}
+
+/* Search input field */
+.search-input {
+  font-size: 18px;
+  border: 1px solid #d5cdcd;
+  border-radius: 3px;
+  padding: 10px;
+  transition: border-color 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #4285f4;
+  box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+}
+
+/* Search results container */
+.search-results {
+  width: 100%;
+  padding-left: 20px;
+}
+
+/* Individual result item */
+.result-item {
+  margin-bottom: 30px;
+  padding: 15px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.result-item:hover {
+  background-color: #f8f9fa;
+}
+
+/* Result title */
+.result-title {
+  font-size: 22px;
+  color: #1a0dab;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.result-title:hover {
+  text-decoration: underline;
+}
+
+/* URL description */
+.link-description {
+  color: #444444;
+  font-size: 15px;
+  margin-top: 5px;
+  line-height: 1.4;
+}
+
+/* Result URL */
+.result-url {
+  color: #006621;
+  text-decoration: none;
+  font-size: 14px;
+  display: inline-block;
+  margin: 5px 0;
+}
+
+.result-url:hover {
+  text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .main-container {
+    padding: 10px;
+  }
+  
+  .wiki-search-header {
+    padding: 20px 15px;
+  }
+  
+  .search-input {
+    font-size: 16px;
+  }
+  
+  .result-title {
+    font-size: 20px;
+  }
+}
